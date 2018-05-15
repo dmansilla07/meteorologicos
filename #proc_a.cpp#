@@ -1,0 +1,12 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+class
+
+int main() {
+  string s;
+  while (getline(cin,s) != "") {
+    if (
+  }
+}
