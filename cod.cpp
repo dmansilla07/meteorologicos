@@ -56,16 +56,44 @@ vector<vector<string> > getDailyValues(string &s) {
   return dailyValues;
 }
 
+string changeBlank(string s) {
+  string res = "";
+  for(int i=0; i<s.size(); ++i) {
+    if (s[i] == ' ') res += '_';
+    else res += s[i];
+  }
+  return res;
+}
+
+string toString(int number) {
+  string res = "";
+  for(int i=0; i<2; ++i) {
+    res = char(number%10 + '0') + res;
+    number /= 10;
+  }
+  return res;
+}
+
+string toDate(string year, int month, int day) {
+  return year+"/"+toString(month)+"/"+toString(day);
+}
+
+Record records[100005];
+
 int main() {
   string s;
+  int k = 0;
+  set<string> unique_titles;
+  ofstream outputFile;
   while (getline(cin,s)) {
     if (cin.eof()) {
       break;
     }
     
     if (isTitle(s)) {
-      string title = getTitle(s);
+      string title = changeBlank(getTitle(s));
       getLine2(s, 2);
+      unique_titles.insert(title);
       string ano = getAno(s);
       getLine2(s, 1);
       vector<string> anualValues = getAnualValues(s);
@@ -75,7 +103,26 @@ int main() {
       }
       getLine2(s, 5);
       vector<vector<string> >dailyValues = getDailyValues(s);
-      
+      records[k++] = Record(title, ano, anualValues, dailyValues);
     }
   }
+
+  for(set<string>::iterator it = unique_titles.begin(); it != unique_titles.end(); ++it) {
+    string cur_title = *it;
+    string file_name = cur_title+".txt"; 
+    outputFile.open(file_name.c_str());
+    for(int i=0; i<k; ++i) {
+      if (records[i].title == cur_title) {
+	for(int month=0; month<12; ++month) {
+	  for(int day=0; day<31; ++day) {
+	    if (records[i].dailyValues[month][day] != "") {
+	      outputFile<<toDate(records[i].ano, month+1, day+1)<<" "<<records[i].dailyValues[month][day]<<"\n";
+	    }
+	  }
+	}
+      }
+    }
+      outputFile.close();
+  }
+  
 }
