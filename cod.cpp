@@ -14,8 +14,13 @@ string trimString(string s) {
 }
 
 bool isTitle(string &s) {
-  if (s.size() < 125) return false;
+  if (s.size() < 112) return false;
   string targ = s.substr(112);
+  //cout<<targ<<endl;
+  if (targ[0] == 'N' && targ[1] == 'A') {
+    //cout<<targ<<endl;
+  }
+  if (targ[0] == 'N' && targ[1] == 'A') return true;
   if (targ == "NACIONAL AMBIENTAL") return true;
   else return false;
 }
@@ -32,26 +37,28 @@ string getAno(string &s) {
   return trimString(s.substr(59, 9));
 }
 
-void getLine2(string &s, int veces) {
-  while (veces--) getline(cin,s);
+void getLine2(ifstream &iF, string &s, int veces) {
+  while (veces--) getline(iF, s);
 }
 
-vector<string> getAnualValues(string &s) {
+vector<string> getAnualValues(ifstream &iF, string &s) {
   vector<string> anualValues;
   for(int i=0; i<11; ++i) {
+    
     if (i%4==0) {
-      getline(cin,s);
+      getline(iF,s);
       while (s.size() <= 130) s = s + " ";
     }
+    //cout<<trimString(s.substr(kIniAnualV[i%4], 20))<<endl;
     anualValues.push_back(trimString(s.substr(kIniAnualV[i%4], 20)));
   }
   return anualValues;
 }
 
-vector<vector<string> > getDailyValues(string &s) {
+vector<vector<string> > getDailyValues(ifstream &iF, string &s) {
   vector<vector<string> >dailyValues(31, vector<string> (31, " "));
   for(int i=0; i<31; ++i) {
-    getline(cin, s);
+    getline(iF, s);
     while (s.size() <= 120) s = s + " ";
     for(int j=0; j<12; ++j) {
       dailyValues[j][i] = trimString(s.substr(kIniDailyV[j], 8));
@@ -123,29 +130,36 @@ int main() {
   set<string> unique_titles;
   set<string> unique_estacion;
   ofstream outputFile;
-  while (getline(cin,s)) {
+  ifstream inFile;
+  inFile.open("20189050037792DIARIO");
+  int ct = 0;
+  while (getline(inFile,s)) {
     if (cin.eof()) {
       break;
     }
-    
+    ++ct;
+    //if (ct <= 4) if (s.size() >= 112) cout<<isTitle(s)<<endl;
     if (isTitle(s)) {
       string title = changeBlank(getTitle(s));
-      getLine2(s, 2);
+      //cout<<title<<endl;
+      getLine2(inFile, s, 2);
       unique_titles.insert(title);
       string ano = getAno(s);
+      //cout<<ano<<endl;
       string estacion = getEstacion(s);
-      getLine2(s, 1);
-      vector<string> anualValues = getAnualValues(s);
-      cout<<title<<" "<<ano<<endl;
+      getLine2(inFile, s, 1);
+      //cout<<estacion<<endl;
+      vector<string> anualValues = getAnualValues(inFile, s);
+      //cout<<title<<" "<<ano<<endl;
       for(int i=0; i<anualValues.size(); ++i) {
 	//	cout<<anualValues[i]<<endl;
       }
-      getLine2(s, 5);
-      vector<vector<string> >dailyValues = getDailyValues(s);
+      getLine2(inFile, s, 5);
+      vector<vector<string> >dailyValues = getDailyValues(inFile, s);
       records[k++] = Record(title, estacion, ano, anualValues, dailyValues);
     }
   }
-
+  cout<<k<<endl;
   for(set<string>::iterator it = unique_titles.begin(); it != unique_titles.end(); ++it) {
     unique_estacion.clear();
     string cur_title = *it;
@@ -159,8 +173,8 @@ int main() {
     for(set<string>::iterator it2 = unique_estacion.begin(); it2 != unique_estacion.end(); ++it2) {
       string cur_estacion = *it2;
       //cout<<cur_estacion<<endl;
-      string file_name = cur_title+"EST_"+cur_estacion+".txt"; 
-      // cout<<file_name<<endl;
+      string file_name = "Resultados/"+cur_title+"EST_"+cur_estacion+".txt"; 
+      cout<<file_name<<endl;
       outputFile.open(file_name.c_str());
       outputFile<<cur_estacion<<"\n";
       for(int year = 1979; year<= 2018; ++year) {
